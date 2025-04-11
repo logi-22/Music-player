@@ -16,6 +16,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # Debug to check if the secret is injected (optional, remove after success)
+      - name: Debug Secret
+        run: echo "GCP_SA_KEY content: ${{ secrets.GCP_SA_KEY }}"
+
       # Authenticate to Google Cloud
       - name: Authenticate to Google Cloud
         id: auth
@@ -39,7 +43,7 @@ jobs:
           docker build -t us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/music-player/demo-app:$GITHUB_SHA .
           docker push us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/music-player/demo-app:$GITHUB_SHA
 
-      # Deploy to Cloud Run with environment variables
+      # Deploy to Cloud Run
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy music-player-service \
@@ -47,8 +51,4 @@ jobs:
             --platform managed \
             --region us-central1 \
             --allow-unauthenticated \
-            --set-env-vars "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" \
-            --set-env-vars "SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}" \
-            --set-env-vars "SPOTIFY_CLIENT_ID=${{ secrets.SPOTIFY_CLIENT_ID }}" \
-            --set-env-vars "SPOTIFY_CLIENT_SECRET=${{ secrets.SPOTIFY_CLIENT_SECRET }}" \
             --quiet
